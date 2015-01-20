@@ -5,10 +5,10 @@ action :configure do
   # this in the resource declaration because node isn't populated yet when
   # that runs
   [:catalina_options, :java_options, :use_security_manager, :authbind,
-   :max_threads, :ssl_max_threads, :ssl_cert_file, :ssl_key_file,
-   :ssl_chain_files, :keystore_file, :keystore_type, :truststore_file,
-   :truststore_type, :certificate_dn, :loglevel, :tomcat_auth, :user,
-   :group, :tmp_dir, :lib_dir, :endorsed_dir].each do |attr|
+    :max_threads, :ssl_max_threads, :ssl_cert_file, :ssl_key_file,
+    :ssl_chain_files, :keystore_file, :keystore_type, :truststore_file,
+    :truststore_type, :certificate_dn, :loglevel, :tomcat_auth, :user,
+    :group, :tmp_dir, :lib_dir, :endorsed_dir].each do |attr|
     if not new_resource.instance_variable_get("@#{attr}")
       new_resource.instance_variable_set("@#{attr}", node['tomcat'][attr])
     end
@@ -19,7 +19,7 @@ action :configure do
 
     # If they weren't set explicitly, set these paths to the default
     [:base, :home, :config_dir, :log_dir, :work_dir, :context_dir,
-     :webapp_dir].each do |attr|
+      :webapp_dir].each do |attr|
       if not new_resource.instance_variable_get("@#{attr}")
         new_resource.instance_variable_set("@#{attr}", node["tomcat"][attr])
       end
@@ -31,7 +31,7 @@ action :configure do
     # If they weren't set explicitly, set these paths to the default with
     # the base instance name replaced with our own
     [:base, :home, :config_dir, :log_dir, :work_dir, :context_dir,
-     :webapp_dir].each do |attr|
+      :webapp_dir].each do |attr|
       if not new_resource.instance_variable_get("@#{attr}") and node["tomcat"][attr]
         new = node["tomcat"][attr].sub("tomcat#{node['tomcat']['base_version']}", "#{instance}")
         new_resource.instance_variable_set("@#{attr}", new)
@@ -63,7 +63,7 @@ action :configure do
 
     # config_dir needs symlinks to the files we're not going to create
     ['catalina.policy', 'catalina.properties', 'context.xml',
-     'tomcat-users.xml', 'web.xml'].each do |file|
+      'tomcat-users.xml', 'web.xml'].each do |file|
       link "#{new_resource.config_dir}/#{file}" do
         to "#{node['tomcat']['config_dir']}/#{file}"
       end
@@ -76,7 +76,7 @@ action :configure do
       end
     end
     {'conf' => 'config_dir', 'logs' => 'log_dir', 'temp' => 'tmp_dir',
-     'work' => 'work_dir', 'webapps' => 'webapp_dir'}.each do |name, attr|
+      'work' => 'work_dir', 'webapps' => 'webapp_dir'}.each do |name, attr|
       link "#{new_resource.base}/#{name}" do
         to new_resource.instance_variable_get("@#{attr}")
       end
@@ -106,18 +106,26 @@ action :configure do
 
   case node['platform']
   when 'centos', 'redhat', 'fedora', 'amazon', 'oracle'
+    
+    directory node['tomcat']['log_dir'] do
+      mode '0755'
+      recursive true
+      user new_resource.user
+      group new_resource.group
+    end
+    
     template "/etc/sysconfig/#{instance}" do
       source 'sysconfig_tomcat6.erb'
       variables ({
-        :user => new_resource.user,
-        :home => new_resource.home,
-        :base => new_resource.base,
-        :java_options => new_resource.java_options,
-        :use_security_manager => new_resource.use_security_manager,
-        :tmp_dir => new_resource.tmp_dir,
-        :catalina_options => new_resource.catalina_options,
-        :endorsed_dir => new_resource.endorsed_dir
-      })
+          :user => new_resource.user,
+          :home => new_resource.home,
+          :base => new_resource.base,
+          :java_options => new_resource.java_options,
+          :use_security_manager => new_resource.use_security_manager,
+          :tmp_dir => new_resource.tmp_dir,
+          :catalina_options => new_resource.catalina_options,
+          :endorsed_dir => new_resource.endorsed_dir
+        })
       owner 'root'
       group 'root'
       mode '0644'
@@ -136,17 +144,17 @@ action :configure do
     template "/etc/default/#{instance}" do
       source 'default_tomcat6.erb'
       variables ({
-        :user => new_resource.user,
-        :group => new_resource.group,
-        :home => new_resource.home,
-        :base => new_resource.base,
-        :java_options => new_resource.java_options,
-        :use_security_manager => new_resource.use_security_manager,
-        :tmp_dir => new_resource.tmp_dir,
-        :authbind => new_resource.authbind,
-        :catalina_options => new_resource.catalina_options,
-        :endorsed_dir => new_resource.endorsed_dir
-      })
+          :user => new_resource.user,
+          :group => new_resource.group,
+          :home => new_resource.home,
+          :base => new_resource.base,
+          :java_options => new_resource.java_options,
+          :use_security_manager => new_resource.use_security_manager,
+          :tmp_dir => new_resource.tmp_dir,
+          :authbind => new_resource.authbind,
+          :catalina_options => new_resource.catalina_options,
+          :endorsed_dir => new_resource.endorsed_dir
+        })
       owner 'root'
       group 'root'
       mode '0644'
@@ -156,7 +164,7 @@ action :configure do
 
   template "#{new_resource.config_dir}/server.xml" do
     source 'server.xml.erb'
-      variables ({
+    variables ({
         :port => new_resource.port,
         :proxy_port => new_resource.proxy_port,
         :ssl_port => new_resource.ssl_port,
@@ -242,6 +250,7 @@ action :configure do
     end
   end
 
+  log "creating service #{instance}"
   service "#{instance}" do
     case node['platform']
     when 'centos', 'redhat', 'fedora', 'amazon'
