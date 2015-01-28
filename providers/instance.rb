@@ -16,7 +16,7 @@ action :configure do
 
   if new_resource.name == 'base'
     instance = base_instance
-
+    log "----- DOING BASE"
     # If they weren't set explicitly, set these paths to the default
     [:base, :home, :config_dir, :log_dir, :work_dir, :context_dir,
       :webapp_dir].each do |attr|
@@ -27,7 +27,7 @@ action :configure do
   else
     # Use a unique name for this instance
     instance = "#{base_instance}-#{new_resource.name}"
-
+     log "----- DOING INSTANCE"
     # If they weren't set explicitly, set these paths to the default with
     # the base instance name replaced with our own
     [:base, :home, :config_dir, :log_dir, :work_dir, :context_dir,
