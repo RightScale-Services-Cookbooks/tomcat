@@ -19,7 +19,7 @@
 
 #override some variables for tar file
 node.override['tomcat']['base']= node['tomcat']['home']
-node.override['tomcat']['config_dir']= "#{node['tomcat']['home']}/conf"
+#node.override['tomcat']['config_dir']= "#{node['tomcat']['home']}/conf"
 
 # download the the file
 filename = "/tmp/tomcat#{node["tomcat"]["base_version"]}"
@@ -67,11 +67,15 @@ bash "extracting #{filename}" do
   
 end
 
-  link node["tomcat"]["log_dir"] do
-    to "#{node["tomcat"]["home"]}/logs"
-    #notifies :restart, resources(:service => "tomcat#{node['tomcat']['base_version']}")
-  end
+link node["tomcat"]["log_dir"] do
+  to "#{node["tomcat"]["home"]}/logs"
+  #notifies :restart, resources(:service => "tomcat#{node['tomcat']['base_version']}")
+end
   
+link node["tomcat"]["config_dir"] do
+  to "#{node["tomcat"]["home"]}/conf"
+end
+
 file "/tmp/tomcat#{node["tomcat"]["base_version"]}" do
   action :delete
 end
