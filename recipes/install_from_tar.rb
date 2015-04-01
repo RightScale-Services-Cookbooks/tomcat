@@ -24,7 +24,7 @@ node.override['tomcat']['base']= node['tomcat']['home']
 # download the the file
 filename = "/tmp/tomcat#{node["tomcat"]["base_version"]}"
 remote_file filename do
-  source "http://www.eng.lsu.edu/mirrors/apache/tomcat/tomcat-#{node["tomcat"]["base_version"]}/v#{node["tomcat"]["tar_version"]}/bin/apache-tomcat-#{node["tomcat"]["tar_version"]}.tar.gz"
+  source "http://archive.apache.org/dist/tomcat/tomcat-#{node["tomcat"]["base_version"]}/v#{node["tomcat"]["tar_version"]}/bin/apache-tomcat-#{node["tomcat"]["tar_version"]}.tar.gz"
 end
 
 # create install directories
