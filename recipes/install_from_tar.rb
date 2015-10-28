@@ -17,6 +17,10 @@
 # limitations under the License.
 
 
+package "redhat-lsb-core" do
+  only_if { node['platform_family'] == 'rhel' }
+end
+
 #override some variables for tar file
 node.override['tomcat']['base']= node['tomcat']['home']
 #node.override['tomcat']['config_dir']= "#{node['tomcat']['home']}/conf"
@@ -32,9 +36,10 @@ directory node["tomcat"]["home"] do
   action :create
 end
 
-#directory node['tomcat']['config_dir'] do
-#  action :create
-#end
+directory "#{node["tomcat"]["home"]}/conf/Catalina/localhost" do
+  recursive true
+  action :create
+end
 
 # create user and group for init.d script to use
 user node["tomcat"]["user"] do
@@ -53,8 +58,9 @@ template "/etc/init.d/tomcat#{node["tomcat"]["base_version"]}" do
   mode 0755
   variables ({
       :user => node["tomcat"]["user"],
-      :group => node["tomcat"]["groiup"],
-      :name => "tomcat#{node["tomcat"]["base_version"]}"}
+      :group => node["tomcat"]["group"],
+      :name => "tomcat#{node["tomcat"]["base_version"]}"
+  }
   )
 end
 

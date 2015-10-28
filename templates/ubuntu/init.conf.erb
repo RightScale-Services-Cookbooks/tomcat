@@ -58,11 +58,12 @@ TOMCAT8_GROUP=<%= @group %>
 # this function sets the variable JDK_DIRS
 find_jdks()
 {
-    for java_version in 9 8 7
+    for java_version in 9 8 7 1.9 1.8 1.7 
     do
         for jvmdir in /usr/lib/jvm/java-${java_version}-openjdk-* \
                       /usr/lib/jvm/jdk-${java_version}-oracle-* \
-                      /usr/lib/jvm/jre-${java_version}-oracle-*
+                      /usr/lib/jvm/jre-${java_version}-oracle-* \
+                      /usr/lib/jvm/jdk${java_version}*
         do
             if [ -d "${jvmdir}" ]
             then
@@ -92,7 +93,7 @@ export JAVA_HOME
 CATALINA_HOME=/usr/share/$NAME
 
 # Directory for per-instance configuration files and webapps
-CATALINA_BASE=/var/lib/$NAME
+CATALINA_BASE=/usr/share/$NAME
 
 # Use the Java security manager? (yes/no)
 TOMCAT8_SECURITY=no
@@ -192,7 +193,7 @@ case "$1" in
 		exit 1
 	fi
 
-	log_daemon_msg "Starting $DESC" "$NAME"
+	log_failure_msg "Starting $DESC" "$NAME"
 	if start-stop-daemon --test --start --pidfile "$CATALINA_PID" \
 		--user $TOMCAT8_USER --exec "$JAVA_HOME/bin/java" \
 		>/dev/null; then
